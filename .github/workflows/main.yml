@@ -1,0 +1,59 @@
+name: CI/CD with Kind and GitHub Actions
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Minikube
+      run: |
+        curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        chmod +x minikube
+        sudo mv minikube /usr/local/bin/
+        
+        # Start Minikube (customize this to match your Minikube configuration)
+        minikube start --vm-driver=your-vm-driver --cpus=2 --memory=4096 --disk-size=10g
+        
+    - name: Run and Build Docker image
+      run: |
+        docker build --tag arthpatel11/doccie . 
+        docker tag arthpatel11/doccie:latest  arthpatel11/doccie:my-doccie
+        docker image push arthpatel11/doccie:my-doccie
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_REGISTRY: arthpatel11
+
+    - name: Set up kubectl
+      run: |
+        # Install kubectl
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+        # Configure kubectl to use Minikube context
+        kubectl config use-context minikube
+
+    - name: Deploy to Minikube
+      run: |
+        kubectl apply -f kube/your-app-deployment.yaml
+        kubectl apply -f kube/your-app-service.yaml
+      # Ensure your kubeconfig points to the Minikube cluster
+
+    - name: Show Minikube IP
+      run: |
+        minikube ip
+
+    - name: Cleanup Minikube
+      run: |
+        minikube stop
+        minikube delete
+
