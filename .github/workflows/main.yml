@@ -45,8 +45,8 @@ jobs:
 
     - name: Deploy to Minikube
       run: |
-        kubectl apply -f kube/your-app-deployment.yaml
-        kubectl apply -f kube/your-app-service.yaml
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
       # Ensure your kubeconfig points to the Minikube cluster
 
     - name: Show Minikube IP
