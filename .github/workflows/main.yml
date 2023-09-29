@@ -20,7 +20,7 @@ jobs:
         sudo mv minikube /usr/local/bin/
         
         # Start Minikube (customize this to match your Minikube configuration)
-        minikube start --vm-driver=your-vm-driver --cpus=2 --memory=4096 --disk-size=10g
+        minikube start 
         
     - name: Run and Build Docker image
       run: |
